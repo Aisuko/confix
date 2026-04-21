@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101110">
+  <meta name="description" content="CoCHI: Class-oriented Causal Head Intervention. Understanding and correcting overconfident errors in large language models through targeted attention-head intervention.">
+  <title>CoCHI — Why Are LLMs Confidently Wrong?</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <script src="petals.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#overview">Skip to content</a>
+<header class="header"><nav class="nav wrap" aria-label="Main navigation">
+  <a class="brand" href="#home" aria-label="CoCHI home"><span class="brand-mark" aria-hidden="true">✳</span> CoCHI<span class="brand-period">.</span></a>
+  <div class="nav-links"><a href="#overview">Overview</a><a href="#method">Method</a><a href="#results">Results</a></div>
+  <a class="nav-paper" href="#results">Explore results <span aria-hidden="true">↗</span></a>
+</nav></header>
+<main>
+<section class="hero wrap" id="home">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="status-dot"></span> MECHANISTIC INTERPRETABILITY · 2026</p>
+    <h1>Why are LLMs<br>confidently <span class="serif">wrong?</span></h1>
+    <p class="hero-description">Better confidence starts <em>inside</em> the model.</p>
+    <p class="hero-detail">Correcting overconfident errors through <strong>Class-oriented Causal Head Intervention</strong>. Find the heads that drive unreliable confidence. Intervene precisely.</p>
+    <div class="hero-actions"><a class="button primary" href="#overview"><span aria-hidden="true">↗</span> Explore the research</a><a class="button secondary" href="#method">Discover CoCHI <span aria-hidden="true">↓</span></a></div>
+    <div class="authors"><a href="https://scholar.google.com/citations?user=fUjL_jYAAAAJ">Jing Ren<sup>†</sup></a><a href="https://scholar.google.com/citations?user=D3-py-8AAAAJ">Bowen Li<sup>†</sup></a><a href="https://scholar.google.com/citations?user=znODztEAAAAJ">Ziqi Xu<sup>*</sup></a><a href="https://scholar.google.com/citations?user=1iN2cx0AAAAJ">Xuechao Yang</a><a href="https://scholar.google.com/citations?user=HDFA2VYAAAAJ">Feng Xia</a></div>
+    <p class="affiliation">RMIT University <span>† Equal contribution &nbsp; * Corresponding author</span></p>
+  </div>
+  <div class="hero-visual">
+    <div class="visual-top"><span><i class="tiny-dot"></i> CAUSAL HEAD EXPLORER</span><span>ILLUSTRATIVE</span></div>
+    <canvas id="network" role="img" aria-label="Animated schematic of connected attention heads. Orange error pathways are suppressed when intervention is enabled."></canvas>
+    <span class="orbit-label label-one">ATTENTION HEADS</span><span class="orbit-label label-two">TARGETED INTERVENTION</span>
+    <div class="visual-bottom"><div><span class="legend-dot coral"></span> Error pathway <span class="legend-dot mint"></span> Preserved</div><button id="intervention" class="toggle" type="button" aria-pressed="false"><span class="switch" aria-hidden="true"></span> Apply CoCHI</button></div>
+    <p id="network-status" class="network-status" aria-live="polite">Trace the mechanisms behind model confidence.</p>
+  </div>
+  <div class="hero-foot"><span>CALIBRATION, FROM THE INSIDE OUT.</span><a href="#overview">Scroll to explore <span>↓</span></a></div>
+</section>
+<div class="stats-band"><div class="wrap stats"><div><strong>3</strong><span>LLM families</span></div><div><strong>5</strong><span>QA benchmarks</span></div><div><strong>≤40</strong><span>Calibration examples / dataset</span></div><div><strong>8–10</strong><span>Heads selected per model</span></div></div></div>
+<section class="section wrap" id="overview">
+  <div class="section-heading"><p class="eyebrow">01 / THE IDEA</p><h2>Confidence is a signal.<br><span class="muted">It should be a reliable one.</span></h2></div>
+  <div class="overview-grid"><div class="abstract"><p class="lead">A model can be certain and still be wrong. CoCHI asks which internal components make that happen.</p><p>Most calibration methods adjust output probabilities. CoCHI instead examines the model’s attention heads, linking their causal roles to distinct patterns of correctness and confidence.</p><p>Using a small calibration set, it identifies heads that facilitate overconfident errors and components that do not support confident, correct predictions. A compact, protected mask suppresses selected heads during inference while keeping the pretrained model parameters frozen.</p></div>
+  <div class="class-panel"><div class="panel-heading"><span>FOUR CALIBRATION CLASSES</span><span>τ<sub>c</sub> = 0.5</span></div><div class="class-grid"><div class="class-cell correct"><span>01</span><strong>Correct / High</strong><p>Protect the heads that support reliable answers.</p></div><div class="class-cell"><span>02</span><strong>Correct / Low</strong><p>Right answer. Uncertain confidence.</p></div><div class="class-cell wrong"><span>03 <i>PRIMARY TARGET</i></span><strong>Wrong / High</strong><p>Find the mechanisms behind confident errors.</p></div><div class="class-cell"><span>04</span><strong>Wrong / Low</strong><p>Wrong answer. Uncertainty acknowledged.</p></div></div><p class="panel-note">Classes are defined on labeled calibration data, not by access to test-time correctness.</p></div></div>
+</section>
+<section class="method-section" id="method"><div class="section wrap"><div class="section-heading split-heading"><div><p class="eyebrow">02 / UNDER THE HOOD</p><h2>Small intervention.<br><span class="serif">Causal impact.</span></h2></div><p>From behavioral patterns to a compact structural mask. Four steps, one frozen model.</p></div>
+<div class="pipeline"><article><span class="step-number">01 / DECOMPOSE</span><h3>Separate behaviors</h3><p>Partition predictions by correctness and confidence to isolate overconfident errors.</p><code>correctness × confidence</code></article><article><span class="step-number">02 / ATTRIBUTE</span><h3>Discover causal roles</h3><p>Optimize head gates on each class to identify facilitating and non-facilitating heads.</p><code>necessary + sufficient</code></article><article><span class="step-number">03 / CONSTRUCT</span><h3>Build a protected mask</h3><p>Combine error and noise heads, protect correct-high facilitators, then rank and select top-k.</p><code>H<sub>mask</sub> = H<sub>err</sub> ∪ H<sub>noise</sub></code></article><article><span class="step-number">04 / INTERVENE</span><h3>Gate at inference</h3><p>Suppress the selected head outputs. Preserve the remaining computation and model weights.</p><code>z̃<sub>h</sub>(x) = g<sub>h</sub> · z<sub>h</sub>(x)</code></article></div>
+<figure class="framework"><div class="figure-top"><span>THE COMPLETE FRAMEWORK</span><a href="img/framework.png" target="_blank" rel="noopener">Open figure ↗</a></div><div class="framework-image"><img src="img/framework.png" alt="CoCHI framework: calibration class decomposition, class-conditioned causal head attribution, canonical-union mask construction, and inference-time intervention." width="4015" height="2827"></div><figcaption><span>FIG. 01</span> Class-oriented Causal Head Intervention. Calibration from the inside out.</figcaption></figure>
+<div class="method-callout"><span class="callout-mark" aria-hidden="true">✳</span><p><strong>Keep what makes the model right.</strong><br>Heads that facilitate correct-high predictions are protected from masking, with an additional ranking penalty to preserve useful computation.</p></div>
+</div></section>
+<section class="section wrap" id="results"><div class="section-heading split-heading"><div><p class="eyebrow">03 / THE EVIDENCE</p><h2>More reliable confidence.<br><span class="muted">Across models and domains.</span></h2></div><p>Explore reported results across general knowledge, science, and medical QA.</p></div>
+<div class="result-controls"><div class="model-tabs" role="group" aria-label="Model"><button type="button" data-model="Gemma-2-9B" aria-pressed="true">Gemma-2-9B</button><button type="button" data-model="LLaMA-3.1-8B" aria-pressed="false">LLaMA-3.1-8B</button><button type="button" data-model="Mistral-7B" aria-pressed="false">Mistral-7B</button></div><label class="dataset-label">DATASET <select id="dataset"><option>MMLU</option><option>MedMCQA</option><option>OpenBookQA</option><option>MedQA-USMLE</option><option>SciQ</option></select></label></div>
+<div id="result-summary" class="result-summary" aria-live="polite"></div>
+<div class="table-scroll"><table><caption id="table-caption">Reported benchmark results</caption><thead><tr><th scope="col">Method</th><th scope="col">Accuracy ↑</th><th scope="col">ECE ↓</th><th scope="col">NLL ↓</th><th scope="col">Brier Score ↓</th></tr></thead><tbody id="results-body"></tbody></table></div>
+<p class="results-note">Results shown as mean ± standard deviation. Best means in each metric are highlighted. ECE, NLL, and Brier Score: lower is better. Accuracy: higher is better.</p><noscript><p>Enable JavaScript to explore the interactive benchmark results.</p></noscript>
+<div class="findings"><article><span>01</span><h3>Mechanisms matter</h3><p>Class-conditioned causal selection targets specific sources of unreliable confidence.</p></article><article><span>02</span><h3>Compact by design</h3><p>CoCHI selects 10 heads for LLaMA and 8 for Gemma and Mistral, using a small calibration set.</p></article><article><span>03</span><h3>A clear research scope</h3><p>Evaluated on multiple-choice QA. Open-ended generation and multi-turn interactions remain future work.</p></article></div>
+</section>
+</main>
+<footer class="wrap footer"><div class="footer-top"><a class="brand" href="#home"><span class="brand-mark" aria-hidden="true">✳</span> CoCHI.</a><p>Understanding confidence.<br>Improving reliability.</p><a class="back-top" href="#home">Back to top ↑</a></div><div class="sponsor-row" aria-label="Research sponsor"><div class="sponsor-logo"><img src="img/rmit_race.svg" alt="RMIT RACE" width="206" height="162"></div><div class="sponsor-copy"><span class="sponsor-label">SUPPORTED BY</span><p>RMIT Advanced Compute Environment</p><span>Powering the research behind CoCHI.</span></div><p class="sponsor-thanks">With thanks to<br><strong><a href="https://www.linkedin.com/in/patrick-d-taylor" target="_blank" rel="noopener noreferrer">Patrick Taylor</a>, <a href="https://github.com/Comanx" target="_blank" rel="noopener noreferrer">Jack Li</a></strong></p></div><div class="footer-bottom"><span>© 2026 CoCHI authors · RMIT University</span><span>Class-oriented Causal Head Intervention</span></div></footer>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>
